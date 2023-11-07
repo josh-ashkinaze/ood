@@ -16,7 +16,6 @@ positional arguments:
 optional arguments:
   -h, --help  show this help message and exit
   --debug     Run in debug mode (one day only)
-
 """
 
 import json
@@ -28,6 +27,8 @@ import argparse
 import logging
 from tenacity import retry, wait_fixed, stop_after_attempt
 import os
+from joblib import Parallel, delayed
+
 
 LOG_FORMAT = '%(asctime)s %(levelname)s: %(message)s'
 logging.basicConfig(filename=f'{os.path.basename(__file__)}.log', level=logging.INFO, format=LOG_FORMAT, datefmt='%Y-%m-%d %H:%M:%S', filemode='w')
@@ -87,6 +88,7 @@ def fetch_product_hunt_data_for_date(year, month, day):
     list: A list of products with their information and the date as a field.
     """
     # Construct the URL
+    logging.info(f"Trying to scrape data for {year}-{month}-{day}")
     url = f"https://www.producthunt.com/time-travel/{year}/{month}/{day}"
 
     # Fetch the HTML content
@@ -102,6 +104,7 @@ def fetch_product_hunt_data_for_date(year, month, day):
         try:
             next_data = json.loads(next_data_script.string)
             products = find_products(next_data)
+            logging.info(f"Fetched {len(products)}")
         except Exception as e:
             logging.info(f"Error for {year}-{month}-{day}: {e}")
             return []
@@ -125,28 +128,24 @@ def fetch_products_for_date_range(start_date, end_date):
     end_date (str): The end date in 'YYYY-MM-DD' format.
 
     Returns:
-    dict: A dictionary with dates as keys and lists of product information as values.
+    list: A list of dictionaries of products
     """
+
     start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
     end_date_obj = datetime.strptime(end_date, "%Y-%m-%d")
-    current_date = start_date_obj
+    date_range = [start_date_obj + timedelta(days=x) for x in range((end_date_obj - start_date_obj).days + 1)]
 
-    products_by_date = []
+    # Use all available CPUs minus one
+    num_cores = min(os.cpu_count() - 1, 5)
 
-    while current_date <= end_date_obj:
-        year = current_date.year
-        month = current_date.month
-        day = current_date.day
-        logging.info(f"Fetching data for {year}-{month}-{day} out of {end_date}")
-        products = fetch_product_hunt_data_for_date(year, month, day)
-        if products:
-          for p in products:
-            p.update({'date':current_date.strftime("%Y-%m-%d")})
-            products_by_date.append(p)
-        else:
-          pass
-        current_date += timedelta(days=1)
-    return products_by_date
+    # Execute the fetch_product_hunt_data_for_date function in parallel
+    products_by_date = Parallel(n_jobs=num_cores)(
+        delayed(fetch_product_hunt_data_for_date)(date.year, date.month, date.day) for date in date_range
+    )
+
+    # Flatten the list of lists into a single list
+    products_flat_list = [product for sublist in products_by_date for product in sublist if sublist]
+    return products_flat_list
 
 def main():
     # Set up argument parser
