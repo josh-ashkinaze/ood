@@ -3,7 +3,7 @@ import random
 
 
 class PromptExperiment:
-    """A class to perform Monte Carlo and factorial prompt experiments.
+    """A class to generate prompts for Monte Carlo and factorial prompt experiments.
 
     Attributes:
         hyperparameters (dict): A dictionary with hyperparameter settings.
@@ -71,35 +71,29 @@ class PromptExperiment:
                 prompt_params = self.random_params(self.prompt_parameters)
                 prompt = self.template_prompt.format(**prompt_params)
                 hyperparams = self.random_params(self.hyperparameters)
-                response = self.simulate_response(prompt, hyperparams)
-                result = self.flatten_results(prompt, prompt_params, hyperparams, response)
-                results.append(result)
+                results.append({'prompt': prompt, 'prompt_params': prompt_params, 'hyperparams': hyperparams})
+
 
         elif self.prompt_mode == 'factorial' and self.hyper_mode == 'monte_carlo':
             for prompt_params in self.factorial_params(self.prompt_parameters):
                 prompt = self.template_prompt.format(**prompt_params)
                 for _ in range(self.N):
                     hyperparams = self.random_params(self.hyperparameters)
-                    response = self.simulate_response(prompt, hyperparams)
-                    result = self.flatten_results(prompt, prompt_params, hyperparams, response)
-                    results.append(result)
+                    results.append({'prompt':prompt, 'prompt_params':prompt_params, 'hyperparams':hyperparams})
+
 
         elif self.prompt_mode == 'factorial' and self.hyper_mode == 'factorial':
             for prompt_params in self.factorial_params(self.prompt_parameters):
                 prompt = self.template_prompt.format(**prompt_params)
                 for hyperparams in self.factorial_params(self.hyperparameters):
-                    response = self.simulate_response(prompt, hyperparams)
-                    result = self.flatten_results(prompt, prompt_params, hyperparams, response)
-                    results.append(result)
+                    results.append({'prompt':prompt, 'prompt_params':prompt_params, 'hyperparams':hyperparams})
 
         elif self.prompt_mode == 'monte_carlo' and self.hyper_mode == 'factorial':
             for hyperparams in self.factorial_params(self.hyperparameters):
                 for _ in range(self.N):
                     prompt_params = self.random_params(self.prompt_parameters)
                     prompt = self.template_prompt.format(**prompt_params)
-                    response = self.simulate_response(prompt, hyperparams)
-                    result = self.flatten_results(prompt, prompt_params, hyperparams, response)
-                    results.append(result)
+                    results.append({'prompt':prompt, 'prompt_params':prompt_params, 'hyperparams':hyperparams})
 
         return results
 
@@ -125,14 +119,3 @@ class PromptExperiment:
         """
         return [dict(zip(parameter_space, values)) for values in itertools.product(*parameter_space.values())]
 
-    def simulate_response(self, prompt, hyperparams):
-        """Simulates a response from ChatGPT for demonstration purposes."""
-        # Placeholder for actual API response
-        return "Simulated response."
-
-    def flatten_results(self, prompt, prompt_params, hyperparams, response):
-        """Flattens the experiment result data into a single dictionary."""
-        result = {'prompt': prompt, 'output': response}
-        result.update({f'param_{k}': v for k, v in prompt_params.items()})
-        result.update({f'hyper_{k}': v for k, v in hyperparams.items()})
-        return result
