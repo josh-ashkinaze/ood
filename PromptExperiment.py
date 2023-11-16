@@ -1,6 +1,6 @@
 """
 Author: Joshua Ashkinaze
-Date: 2023-11-16
+Date: 2023-11-01
 
 Description: Generates prompts for prompt experiments. Supports monte carlo and factorial prompt experiments.
 """
