@@ -1,3 +1,9 @@
+"""
+Author: Joshua Ashkinaze
+Date: 2023-11-16
+
+Description: Generates prompts for prompt experiments. Supports monte carlo and factorial prompt experiments.
+"""
 import itertools
 import random
 
@@ -35,6 +41,7 @@ class PromptExperiment:
         self.hyper_mode = hyper_mode
         self.seed = seed
         random.seed(self.seed)
+        self.generated_prompts = self.generate_prompts()
 
     def generate_prompts(self):
         """Generates prompts based on the mode specified (monte_carlo or factorial).
@@ -58,7 +65,7 @@ class PromptExperiment:
         elif self.hyper_mode == 'factorial':
             return self.factorial_params(self.hyperparameters)
 
-    def run_experiments(self):
+    def get_prompts(self):
         """Runs the experiments based on the selected modes and collects responses.
 
         Returns:

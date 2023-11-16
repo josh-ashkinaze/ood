@@ -1,6 +1,6 @@
 """
 Author: Joshua Ashkinaze
-Date: 2023-11-07
+Date: November 2023
 
 Description: Fetches ProductHunt data from the `time travel` page from `start_date` to `end_date`. Returns a dataframe like
 [date, name, tagline]
@@ -39,10 +39,10 @@ def fetch_html(url):
     Fetches the HTML content of a given URL with retries.
 
     Parameters:
-    url (str): The URL to fetch the HTML content from.
+        url (str): The URL to fetch the HTML content from.
 
     Returns:
-    str: The HTML content of the page, or None if an error occurs.
+        str: The HTML content of the page, or None if an error occurs.
     """
     response = requests.get(url)
     response.raise_for_status()
@@ -53,10 +53,10 @@ def find_products(json_data):
     Recursively searches JSON data to find entries that resemble product information.
 
     Parameters:
-    json_data (dict): The JSON data extracted from the __NEXT_DATA__ script tag.
+        json_data (dict): The JSON data extracted from the __NEXT_DATA__ script tag.
 
     Returns:
-    list: A list of dictionaries with product information.
+        list: A list of dictionaries with product information.
     """
     products = []
     if isinstance(json_data, dict):
@@ -79,12 +79,12 @@ def fetch_product_hunt_data_for_date(year, month, day):
     Fetches product data from Product Hunt for a given date.
 
     Parameters:
-    year (int): The year to fetch data for.
-    month (int): The month to fetch data for.
-    day (int): The day to fetch data for.
+        year (int): The year.
+        month (int): The month.
+        day (int): The day.
 
     Returns:
-    list: A list of products with their information and the date as a field.
+        list: A list of dictionaries with product information.
     """
     # Construct the URL
     url = f"https://www.producthunt.com/time-travel/{year}/{month}/{day}"
@@ -121,11 +121,11 @@ def fetch_products_for_date_range(start_date, end_date):
     Fetches product data from Product Hunt for a given date range.
 
     Parameters:
-    start_date (str): The start date in 'YYYY-MM-DD' format.
-    end_date (str): The end date in 'YYYY-MM-DD' format.
+        start_date (str): The start date in 'YYYY-MM-DD' format.
+        end_date (str): The end date in 'YYYY-MM-DD' format.
 
     Returns:
-    dict: A dictionary with dates as keys and lists of product information as values.
+        dict: A dictionary with dates as keys and lists of product information as values.
     """
     start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
     end_date_obj = datetime.strptime(end_date, "%Y-%m-%d")
