@@ -151,9 +151,9 @@ def fetch_products_for_date_range(start_date, end_date):
 def main():
     # Set up argument parser
     parser = argparse.ArgumentParser(description="Fetch product data from Product Hunt.")
-    parser.add_argument('start_date', type=str, nargs='?', default='2019-01-01',
+    parser.add_argument('start_date', type=str, nargs='?', default='2017-12-01',
                         help='Start date in YYYY-MM-DD format (default is 2019-01-01)')
-    parser.add_argument('end_date', type=str, nargs='?', default='2023-11-01',
+    parser.add_argument('end_date', type=str, nargs='?', default='2023-12-01',
                         help='End date in YYYY-MM-DD format (default is 2023-11-01)')
     parser.add_argument('--debug', action='store_true', help='Run in debug mode (one day only)')
     args = parser.parse_args()
