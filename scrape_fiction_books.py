@@ -49,7 +49,7 @@ def get_book_description(link):
                 return ftfy.fix_encoding(description)  # Fixing encoding issues
         return None
     except Exception as e:
-        print(f"Error fetching book description: {e}")
+        logging.info(f"Error fetching book description: {e}")
         return None
 
 # Function to scrape books for a specific month
@@ -80,9 +80,7 @@ def scrape_books_for_month(url):
             books.append(book)
 
             if len(books) % 10 == 0:
-                print(f"Scraped {len(books)} books for {url}")
-                rand_sleep = random.random(0.5, 7)
-                logging.info(f"Sleeping for {rand_sleep} seconds")
+                rand_sleep = random.random()*3
                 time.sleep(rand_sleep)
 
         return books
@@ -93,8 +91,8 @@ def scrape_books_for_month(url):
 
 def main():
     parser = argparse.ArgumentParser(description='Scrape FictionDB for book descriptions.')
-    parser.add_argument('start_date', default="2018-01-01", type=str, help='Start date in YYYY-MM-DD format')
-    parser.add_argument('end_date', default="2023-01-01", type=str, help='End date in YYYY-MM-DD format')
+    parser.add_argument('--start_date', default="2018-01-01", type=str, help='Start date in YYYY-MM-DD format')
+    parser.add_argument('--end_date', default="2023-01-01", type=str, help='End date in YYYY-MM-DD format')
     parser.add_argument('--d', action='store_true', help='Debug mode: scrape only one page')
 
     args = parser.parse_args()
@@ -109,7 +107,7 @@ def main():
     results = Parallel(n_jobs=-1)(delayed(scrape_books_for_month)(url) for url in urls)
     all_books = [book for monthly_books in results for book in monthly_books]
     df = pd.DataFrame(all_books)
-    df.to_csv("fiction_books.csv", index=False)
+    df.to_csv(f"{args.start_date}_{args.end_date}_fiction.csv", index=False)
 
 if __name__ == "__main__":
   main()
