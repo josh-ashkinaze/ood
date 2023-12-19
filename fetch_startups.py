@@ -126,7 +126,7 @@ def main():
     date_range = [start_date_obj + timedelta(days=x) for x in range((end_date_obj - start_date_obj).days + 1)]
 
     # Use ThreadPoolExecutor for parallel execution
-    with ThreadPoolExecutor(max_workers=10) as executor:
+    with ThreadPoolExecutor(max_workers=os.cpu_count()-1) as executor:
         # Submit all tasks to the executor
         future_to_date = {executor.submit(fetch_product_hunt_data_for_date, date): date for date in date_range}
 
@@ -139,7 +139,6 @@ def main():
     products_range = products_range.drop_duplicates()
     products_range.columns = ['name', 'description', 'date']
     logging.info(f"Fetched {len(products_range)} products")
-    print(products_range.head())
     products_range.to_csv(f"{args.start_date}_{args.end_date}_producthunt.csv")
 
 if __name__ == "__main__":
