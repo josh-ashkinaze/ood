@@ -3,14 +3,9 @@ Author: Joshua Ashkinaze
 Date: 2023-12-04
 
 Description: Scrapes fiction book descriptions from FictionDB
-
-ToDo
-- didnt run this for everything
-- add argparse stuff
-- add option to get custom dates 
 """
 
-
+import argparse
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
@@ -19,15 +14,24 @@ from datetime import datetime
 import time
 import random
 import ftfy
+import logging
+import os
+
+LOG_FORMAT = '%(asctime)s %(levelname)s: %(message)s'
+logging.basicConfig(filename=f'{os.path.basename(__file__)}.log', level=logging.INFO, format=LOG_FORMAT, datefmt='%Y-%m-%d %H:%M:%S', filemode='w')
 
 # Function to generate URLs for each month from 2019 to 2023
-def generate_urls():
-    start_year = 2019
-    end_year = 2023
+def generate_urls(start_date, end_date):
+    start_year, start_month, _ = map(int, start_date.split('-'))
+    end_year, end_month, _ = map(int, end_date.split('-'))
     months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
     urls = []
+
     for year in range(start_year, end_year + 1):
-        for month in months:
+        start_m = start_month if year == start_year else 1
+        end_m = end_month if year == end_year else 12
+        for m in range(start_m, end_m + 1):
+            month = months[m - 1]
             url = f"https://www.fictiondb.com/new-releases/new-books-by-month.htm?date={month}-{year}"
             urls.append(url)
     return urls
@@ -50,11 +54,12 @@ def get_book_description(link):
 
 # Function to scrape books for a specific month
 def scrape_books_for_month(url):
+    logging.info(f"Scraping {url}")
     try:
         headers = {'User-Agent': 'Mozilla/5.0'}
         response = requests.get(url, headers=headers)
         if response.status_code != 200:
-            print(f"Failed to fetch {url}")
+            logging.info(f"Failed to fetch {url}")
             return []
 
         soup = BeautifulSoup(response.text, "html.parser")
@@ -72,22 +77,39 @@ def scrape_books_for_month(url):
             series_tag = row.find("td", class_="d-none d-xl-table-cell")
             book["series"] = series_tag.get_text(strip=True) if series_tag else None
             book["description"] = get_book_description(book['link'])
-
             books.append(book)
-            time.sleep(random.uniform(1, 3))  # Random sleep between requests
+
+            if len(books) % 10 == 0:
+                print(f"Scraped {len(books)} books for {url}")
+                rand_sleep = random.random(0.5, 7)
+                logging.info(f"Sleeping for {rand_sleep} seconds")
+                time.sleep(rand_sleep)
 
         return books
 
     except Exception as e:
-        print(f"Error scraping {url}: {e}")
+        logging.info(f"Error scraping {url}: {e}")
         return []
 
 def main():
-  urls = generate_urls()
-  results = Parallel(n_jobs=-1)(delayed(scrape_books_for_month)(url) for url in urls)
-  all_books = [book for monthly_books in results for book in monthly_books]
-  df = pd.DataFrame(all_books)
-  df.to_csv("fiction_books.csv", index=False)
+    parser = argparse.ArgumentParser(description='Scrape FictionDB for book descriptions.')
+    parser.add_argument('start_date', default="2018-01-01", type=str, help='Start date in YYYY-MM-DD format')
+    parser.add_argument('end_date', default="2023-01-01", type=str, help='End date in YYYY-MM-DD format')
+    parser.add_argument('--d', action='store_true', help='Debug mode: scrape only one page')
+
+    args = parser.parse_args()
+
+    logging.info(f"Scraping FictionDB with parameters {str(args)}")
+
+    urls = generate_urls(args.start_date, args.end_date)
+
+    if args.d:
+        urls = urls[:1]  # In debug mode, scrape only the first URL
+
+    results = Parallel(n_jobs=-1)(delayed(scrape_books_for_month)(url) for url in urls)
+    all_books = [book for monthly_books in results for book in monthly_books]
+    df = pd.DataFrame(all_books)
+    df.to_csv("fiction_books.csv", index=False)
 
 if __name__ == "__main__":
   main()
