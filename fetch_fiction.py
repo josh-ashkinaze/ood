@@ -110,6 +110,7 @@ def main():
             results = pool.map(scrape_books_for_month, urls)
             all_books = [book for monthly_books in results if monthly_books for book in monthly_books]
             df = pd.DataFrame(all_books)
+            logging.info(f"All done. Fetched {len(df)} items")
             df['item_id'] = [f"book_{i}" for i in range(len(df))]
             fn = f"{args.start_date}_{args.end_date}_fiction.csv" if not args.d else "debug.csv"
             df.to_csv(fn, index=False)
