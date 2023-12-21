@@ -112,11 +112,11 @@ def main():
                         help='Start date in YYYY-MM-DD format')
     parser.add_argument('--end_date', type=str, nargs='?', default='2023-12-01',
                         help='End date in YYYY-MM-DD format')
-    parser.add_argument('--debug', action='store_true', help='Run in debug mode (one day only)')
+    parser.add_argument('--d', action='store_true', help='Run in debug mode (one day only)')
     args = parser.parse_args()
 
     # If in debug mode, override dates
-    if args.debug:
+    if args.d:
         logging.info("Running in debug mode")
         args.start_date = "2018-01-01"
         args.end_date = "2018-01-02"
