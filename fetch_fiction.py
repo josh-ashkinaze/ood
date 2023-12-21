@@ -106,7 +106,7 @@ def main():
 
     urls = generate_urls(args.start_date, args.end_date)
 
-    pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
+    pool = multiprocessing.Pool(processes=min(multiprocessing.cpu_count(),urls))
     results = pool.map(scrape_books_for_month, urls)
     pool.close()
     pool.join()
