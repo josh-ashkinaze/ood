@@ -3,14 +3,15 @@ Author: Joshua Ashkinaze
 Date: 2023-12-04
 
 Description: Scrapes fiction book descriptions from FictionDB
+
+Note: We scrape the first books each month in ascending order
 """
 
 import argparse
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
-from joblib import Parallel, delayed
-from datetime import datetime
+import multiprocessing
 import time
 import random
 import ftfy
@@ -32,7 +33,7 @@ def generate_urls(start_date, end_date):
         end_m = end_month if year == end_year else 12
         for m in range(start_m, end_m + 1):
             month = months[m - 1]
-            url = f"https://www.fictiondb.com/new-releases/new-books-by-month.htm?date={month}-{year}"
+            url = f"https://www.fictiondb.com/new-releases/new-books-by-month.htm?date={month}-{year}&sort=da"
             urls.append(url)
     return urls
 
@@ -99,12 +100,17 @@ def main():
 
     logging.info(f"Scraping FictionDB with parameters {str(args)}")
 
+    if args.d:
+        args.start_date = "2018-01-01"
+        args.end_date = "2018-01-02"# In debug mode, scrape only the first URL
+
     urls = generate_urls(args.start_date, args.end_date)
 
-    if args.d:
-        urls = urls[:1]  # In debug mode, scrape only the first URL
+    pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
+    results = pool.map(scrape_books_for_month, urls)
+    pool.close()
+    pool.join()
 
-    results = Parallel(n_jobs=-1)(delayed(scrape_books_for_month)(url) for url in urls)
     all_books = [book for monthly_books in results for book in monthly_books]
     df = pd.DataFrame(all_books)
     df.to_csv(f"{args.start_date}_{args.end_date}_fiction.csv", index=False)
