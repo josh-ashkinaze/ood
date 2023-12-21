@@ -138,8 +138,10 @@ def main():
     products_range = pd.DataFrame(flat_products_list)
     products_range = products_range.drop_duplicates()
     products_range.columns = ['name', 'description', 'date']
-    logging.info(f"Fetched {len(products_range)} products")
-    products_range.to_csv(f"{args.start_date}_{args.end_date}_producthunt.csv")
+    products_range['item_id'] = [f"startup_{i}" for i in range(len(products_range))]
+    fn = f"{args.start_date}_{args.end_date}_startups.csv" if not args.d else "debug.csv"
+    logging.info(f"Fetched {len(products_range)} _startups")
+    products_range.to_csv(fn, index=False)
 
 if __name__ == "__main__":
     main()
