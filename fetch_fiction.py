@@ -4,7 +4,7 @@ Date: 2023-12-04
 
 Description: Scrapes fiction book descriptions from FictionDB
 
-Note: We scrape the first (max) 10 pages for each month, sorting books in ascending order of date
+Note: We scrape the first (max) pages for each month, sorting books in ascending order of date
 """
 
 import argparse
@@ -95,7 +95,7 @@ def main():
     parser = argparse.ArgumentParser(description='Scrape FictionDB for book descriptions.')
     parser.add_argument('--start_date', default="2018-01-01", type=str, help='Start date in YYYY-MM-DD format')
     parser.add_argument('--end_date', default="2023-01-01", type=str, help='End date in YYYY-MM-DD format')
-    parser.add_argument('--max_pages', default=10, type=int, help='Max pages to scrape for each month')
+    parser.add_argument('--max_pages', default=15, type=int, help='Max pages to scrape for each month')
     parser.add_argument('--d', action='store_true', help='Debug mode: scrape only one page')
     args = parser.parse_args()
 
@@ -111,7 +111,7 @@ def main():
             all_books = [book for monthly_books in results if monthly_books for book in monthly_books]
             df = pd.DataFrame(all_books)
             logging.info(f"All done. Fetched {len(df)} items")
-            df['item_id'] = [f"book_{i}" for i in range(len(df))]
+            df['dataset_id'] = [f"book_{i}" for i in range(len(df))]
             fn = f"{args.start_date}_{args.end_date}_fiction.csv" if not args.d else "debug.csv"
             df.to_csv(fn, index=False)
     except Exception as e:
