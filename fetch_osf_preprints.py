@@ -43,6 +43,10 @@ def extract_text_tags(info):
     return list(tags)
 
 def get_preprints(provider, start_date, end_date, max_results_per_month=50):
+    """
+    Fetches preprints from a given provider for a given date range. It's set up so that it gets a certain
+    amount per month over a time range and they're sorted oldest first.
+    """
     base_url = f"https://api.osf.io/v2/preprint_providers/{provider}/preprints/"
     results = []
 
@@ -114,7 +118,7 @@ def main():
                         help='Use debug settings (socarxiv, 2021-01-01 to 2021-01-02, max_results=2)')
 
     args = parser.parse_args()
-    logging.info(f"Scraping preprtings with parameters {str(args)}")
+    logging.info(f"Scraping preprints with parameters {str(args)}")
 
     # Handle debug settings
     if args.d:
