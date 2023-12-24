@@ -113,6 +113,8 @@ def main():
     parser.add_argument('--end_date', type=str, nargs='?', default='2023-12-01',
                         help='End date in YYYY-MM-DD format')
     parser.add_argument('--d', action='store_true', help='Run in debug mode (one day only)')
+    parser.add_argument('--pilot', action='store_true', help='Whether to denote this run a pilot run')
+
     args = parser.parse_args()
 
     # If in debug mode, override dates
@@ -139,7 +141,7 @@ def main():
     products_range.columns = ['name', 'description', 'date']
     products_range = products_range.drop_duplicates(subset=['name', 'description'])
     products_range['dataset_id'] = [f"startup_{i}" for i in range(len(products_range))]
-    fn = f"{args.start_date}_{args.end_date}_startups.jsonl" if not args.d else "startups_debug.jsonl"
+    fn = f"{'pilot_' if args.pilot else ''}{args.start_date}_{args.end_date}_startups.jsonl" if not args.d else "startups_debug.jsonl"
     logging.info(f"All done. Fetched {len(products_range)} items")
     products_range.to_json(fn, orient='records', lines=True)
 

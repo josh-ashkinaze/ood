@@ -97,6 +97,7 @@ def main():
     parser.add_argument('--end_date', default="2023-01-01", type=str, help='End date in YYYY-MM-DD format')
     parser.add_argument('--max_pages', default=15, type=int, help='Max pages to scrape for each month')
     parser.add_argument('--d', action='store_true', help='Debug mode: scrape only one page')
+    parser.add_argument('--pilot', action='store_true', help='Whether to denote this run a pilot run')
     args = parser.parse_args()
 
     logging.info(f"Scraping FictionDB with parameters {str(args)}")
@@ -112,7 +113,7 @@ def main():
             df = pd.DataFrame(all_books)
             logging.info(f"All done. Fetched {len(df)} items")
             df['dataset_id'] = [f"book_{i}" for i in range(len(df))]
-            fn = f"{args.start_date}_{args.end_date}_fiction.jsonl" if not args.d else "fiction_debug.jsonl"
+            fn = f"{'pilot_' if args.pilot else ''}{args.start_date}_{args.end_date}_fiction.jsonl" if not args.d else "fiction_debug.jsonl"
             df.to_json(fn, orient='records', lines=True)
     except Exception as e:
         logging.error(f"Error during scraping or DataFrame creation: {e}")
