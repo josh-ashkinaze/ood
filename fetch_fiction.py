@@ -4,7 +4,7 @@ Date: 2023-12-04
 
 Description: Scrapes fiction book descriptions from FictionDB
 
-Note: We scrape the first (max) pages for each month, sorting books in ascending order of date
+Note: We scrape the first (max) pages for each month, sorting books in ascending order of date.
 """
 
 import argparse
@@ -20,7 +20,7 @@ import os
 
 
 def generate_urls(start_date, end_date, max_pages=10):
-    """Generate URLs for each month. Also scrape up to max_pages pages for each month."""
+    """Generate URLs for each month. Also scrape up to max_pages pages for each month so add page no to URL"""
     start_year, start_month, _ = map(int, start_date.split('-'))
     end_year, end_month, _ = map(int, end_date.split('-'))
     months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
@@ -51,7 +51,6 @@ def get_book_description(link):
         logging.info(f"Error fetching book description: {e}")
         return None
 
-# Function to scrape books for a specific month
 def scrape_books_for_month(url):
     logging.info(f"Scraping {url}")
     try:
@@ -112,8 +111,8 @@ def main():
             df = pd.DataFrame(all_books)
             logging.info(f"All done. Fetched {len(df)} items")
             df['dataset_id'] = [f"book_{i}" for i in range(len(df))]
-            fn = f"{args.start_date}_{args.end_date}_fiction.csv" if not args.d else "debug.csv"
-            df.to_csv(fn, index=False)
+            fn = f"{args.start_date}_{args.end_date}_fiction.jsonl" if not args.d else "fiction_debug.jsonl"
+            df.to_json(fn, orient='records', lines=True)
     except Exception as e:
         logging.error(f"Error during scraping or DataFrame creation: {e}")
 

@@ -139,9 +139,9 @@ def main():
     products_range = products_range.drop_duplicates()
     products_range.columns = ['name', 'description', 'date']
     products_range['dataset_id'] = [f"startup_{i}" for i in range(len(products_range))]
-    fn = f"{args.start_date}_{args.end_date}_startups.csv" if not args.d else "debug.csv"
+    fn = f"{args.start_date}_{args.end_date}_startups.jsonl" if not args.d else "startups_debug.jsonl"
     logging.info(f"All done. Fetched {len(products_range)} items")
-    products_range.to_csv(fn, index=False)
+    products_range.to_json(fn, orient='records', lines=True)
 
 if __name__ == "__main__":
     main()
