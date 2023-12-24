@@ -136,8 +136,8 @@ def main():
             flat_products_list.extend(future.result())
 
     products_range = pd.DataFrame(flat_products_list)
-    products_range = products_range.drop_duplicates()
     products_range.columns = ['name', 'description', 'date']
+    products_range = products_range.drop_duplicates(subset=['name', 'description'])
     products_range['dataset_id'] = [f"startup_{i}" for i in range(len(products_range))]
     fn = f"{args.start_date}_{args.end_date}_startups.jsonl" if not args.d else "startups_debug.jsonl"
     logging.info(f"All done. Fetched {len(products_range)} items")
