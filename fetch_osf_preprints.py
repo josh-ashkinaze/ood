@@ -142,7 +142,7 @@ def main():
     df, r = get_preprints(provider, start_date, end_date, max_results_per_month)
     df['dataset_id'] = [f"{provider}_{i}" for i in range(len(df))]
     fn = f"{'pilot_' if args.pilot else ''}{args.start_date}_{args.end_date}_{provider}.jsonl" if not args.d else f"debug_{provider}.jsonl"
-    logging.info("Finished scraping preprints for {provider}. Got {len(df)} results")
+    logging.info(f"Finished scraping preprints for {provider}. Got {len(df)} results")
     df.to_json(fn, orient='records', lines=True)
 
 if __name__ == "__main__":
