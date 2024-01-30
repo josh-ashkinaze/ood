@@ -81,6 +81,7 @@ def main():
 
     podcasts_df = pd.DataFrame(podcasts)
     podcasts_df['dataset_id'] = [f"podcast_{i}" for i in range(len(podcasts_df))]
+    podcasts_df['date'] = podcasts_df['newestItemPublishTime'].apply(lambda x: datetime.fromtimestamp(x).strftime("%Y-%m-%d"))
     podcasts_df.to_json(filename, orient='records', lines=True)
     logging.info("Wrote to json")
 
@@ -88,3 +89,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
