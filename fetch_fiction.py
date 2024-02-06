@@ -112,7 +112,7 @@ def main():
             monthly_books = scrape_books_for_month(url)
             if monthly_books:
                 all_books.extend(monthly_books)
-                time.sleep(20, 60*10)
+                time.sleep(random.uniform(20, 60*10))
             df = pd.DataFrame(all_books)
             logging.info(f"All done. Fetched {len(df)} items")
             df['dataset_id'] = [f"book_{i}" for i in range(len(df))]
