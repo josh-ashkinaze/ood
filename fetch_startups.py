@@ -7,6 +7,7 @@ Description: Fetches ProductHunt data from the `time travel` page
 
 import json
 import requests
+import random
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 import pandas as pd
@@ -14,37 +15,19 @@ import argparse
 import logging
 from tenacity import retry, wait_fixed, stop_after_attempt
 import os
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 LOG_FORMAT = '%(asctime)s %(levelname)s: %(message)s'
 logging.basicConfig(filename=f'{os.path.basename(__file__)}.log', level=logging.INFO, format=LOG_FORMAT, datefmt='%Y-%m-%d %H:%M:%S', filemode='w')
 
-# Retry configuration with tenacity
 @retry(wait=wait_fixed(300), stop=stop_after_attempt(3))
 def fetch_html(url):
-    """
-    Fetches the HTML content of a given URL with retries.
-
-    Parameters:
-        url (str): The URL to fetch the HTML content from.
-
-    Returns:
-        str: The HTML content of the page, or None if an error occurs.
-    """
     response = requests.get(url)
+    #print(url)
+    #print(response.text)
     response.raise_for_status()
     return response.text
 
 def find_products(json_data):
-    """
-    Recursively searches JSON data to find entries that resemble product information.
-
-    Parameters:
-        json_data (dict): The JSON data extracted from the __NEXT_DATA__ script tag.
-
-    Returns:
-        list: A list of dictionaries with product information.
-    """
     products = []
     if isinstance(json_data, dict):
         if 'name' in json_data and 'tagline' in json_data:
@@ -63,37 +46,25 @@ def find_products(json_data):
     return products
 
 def fetch_product_hunt_data_for_date(current_date):
-    """
-    Fetches product data from Product Hunt for a single date.
-
-    Parameters:
-        current_date (datetime): The date for which to fetch the data.
-
-    Returns:
-        list: A list of product information for the given date.
-    """
+    print(current_date)
     year = current_date.year
     month = current_date.month
     day = current_date.day
     logging.info(f"Fetching data for {year}-{month}-{day}")
 
-    # Construct the URL
-    url = f"https://www.producthunt.com/time-travel/{year}/{month}/{day}"
-
-    # Fetch the HTML content
+    url = f"https://www.producthunt.com/leaderboard/daily/{year}/{month}/{day}/all"
     html_content = fetch_html(url)
+    #print(html_content)
     if not html_content:
         return []
 
-    # Parse the HTML content
     soup = BeautifulSoup(html_content, 'html.parser')
+    #print(soup)
     next_data_script = soup.find('script', {'id': '__NEXT_DATA__'})
-
     if next_data_script and next_data_script.string:
         try:
             next_data = json.loads(next_data_script.string)
             products = find_products(next_data)
-            # Add the date as a field to each product
             date_string = f"{year}-{month:02d}-{day:02d}"
             for product in products:
                 product['date'] = date_string
@@ -106,36 +77,34 @@ def fetch_product_hunt_data_for_date(current_date):
         return []
 
 def main():
-    # Set up argument parser
     parser = argparse.ArgumentParser(description="Fetch product data from Product Hunt.")
-    parser.add_argument('--start_date', type=str, nargs='?', default='2017-01-01',
+    parser.add_argument('--start_date', type=str, nargs='?', default='2023-01-01',
                         help='Start date in YYYY-MM-DD format')
-    parser.add_argument('--end_date', type=str, nargs='?', default='2023-12-01',
+    parser.add_argument('--end_date', type=str, nargs='?', default='2023-02-01',
                         help='End date in YYYY-MM-DD format')
     parser.add_argument('--d', action='store_true', help='Run in debug mode (one day only)')
     parser.add_argument('--pilot', action='store_true', help='Whether to denote this run a pilot run')
 
     args = parser.parse_args()
 
-    # If in debug mode, override dates
     if args.d:
         logging.info("Running in debug mode")
         args.start_date = "2018-01-01"
         args.end_date = "2018-01-02"
 
     start_date_obj = datetime.strptime(args.start_date, "%Y-%m-%d")
+    # Adjust end_date_obj to include the entire month following the original end month
     end_date_obj = datetime.strptime(args.end_date, "%Y-%m-%d")
+    end_date_obj = (end_date_obj + timedelta(days=45)).replace(day=1) - timedelta(days=1)  # Move to next month and find last day
     date_range = [start_date_obj + timedelta(days=x) for x in range((end_date_obj - start_date_obj).days + 1)]
 
-    # Use ThreadPoolExecutor for parallel execution
-    with ThreadPoolExecutor(max_workers=os.cpu_count()-1) as executor:
-        # Submit all tasks to the executor
-        future_to_date = {executor.submit(fetch_product_hunt_data_for_date, date): date for date in date_range}
-
-        # Collect the results as they complete
-        flat_products_list = []
-        for future in as_completed(future_to_date):
-            flat_products_list.extend(future.result())
+    flat_products_list = []
+    for current_date in date_range:
+        date_results = fetch_product_hunt_data_for_date(current_date)
+        flat_products_list.extend(date_results)
+        sleep_time = random.uniform(5, 60)
+        logging.info(f"Sleeping for post-date {sleep_time}")
+        time.sleep(sleep_time)
 
     products_range = pd.DataFrame(flat_products_list)
     products_range.columns = ['name', 'description', 'date']
