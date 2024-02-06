@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 import argparse
 import logging
+import time
 from tenacity import retry, wait_fixed, stop_after_attempt
 import os
 
