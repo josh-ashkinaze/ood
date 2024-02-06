@@ -101,12 +101,13 @@ def main():
     headlines = get_nyt_headlines(api_key, start_date, end_date)
 
     if args.pilot:
-        filename = f"pilot_{args.start_date}_to_{args.end_date}_nyt_headlines.json"
+        filename = f"pilot_{args.start_date}_to_{args.end_date}_nyt_headlines.jsonl"
     else:
-        filename = f"{args.start_date}_to_{args.end_date}_nyt_headlines.json"
+        filename = f"{args.start_date}_to_{args.end_date}_nyt_headlines.jsonl"
 
     with open(filename, 'w') as file:
-        json.dump(headlines, file)
+        for headline in headlines:
+            file.write(json.dumps(headline) + '\n')
 
     logging.info(f"NYT headlines (n={len(headlines)}) from {args.start_date} to {args.end_date} saved to {filename}")
 
