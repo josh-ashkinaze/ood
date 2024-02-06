@@ -75,11 +75,11 @@ def scrape_books_for_month(url):
             series_tag = row.find("td", class_="d-none d-xl-table-cell")
             book["series"] = series_tag.get_text(strip=True) if series_tag else None
             book["description"] = get_book_description(book['link'])
+            time.sleep(random.uniform(0.1, 0.2))
             books.append(book)
 
         if len(books) % 10 == 0:
             time.sleep(random.uniform(1, 3))
-
         if books:
             logging.info(f"Scraped {len(books)} books for {url}")
         return books
