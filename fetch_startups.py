@@ -141,7 +141,7 @@ def main():
     products_range.columns = ['name', 'description', 'date']
     products_range = products_range.drop_duplicates(subset=['name', 'description'])
     products_range['dataset_id'] = [f"startup_{i}" for i in range(len(products_range))]
-    fn = f"{'pilot_' if args.pilot else ''}{args.start_date}_{args.end_date}_startups.jsonl" if not args.d else "startups_debug.jsonl"
+    fn = f"{'pilot_' if args.pilot else ''}{args.start_date}_to_{args.end_date}_startups.jsonl" if not args.d else "startups_debug.jsonl"
     logging.info(f"All done. Fetched {len(products_range)} items")
     products_range.to_json(fn, orient='records', lines=True)
 
