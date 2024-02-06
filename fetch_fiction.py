@@ -79,6 +79,7 @@ def scrape_books_for_month(url):
 
         if len(books) % 10 == 0:
             time.sleep(random.uniform(1, 3))
+
         if books:
             logging.info(f"Scraped {len(books)} books for {url}")
         return books
