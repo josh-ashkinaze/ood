@@ -115,11 +115,11 @@ def main():
                 sleep_time = random.uniform(10, 300)
                 logging.info("Sleeping for {}".format(sleep_time))
                 time.sleep(sleep_time)
-            df = pd.DataFrame(all_books)
-            logging.info(f"All done. Fetched {len(df)} items")
-            df['dataset_id'] = [f"book_{i}" for i in range(len(df))]
-            fn = f"{'pilot_' if args.pilot else ''}{args.start_date}_{args.end_date}_fiction.jsonl" if not args.d else "fiction_debug.jsonl"
-            df.to_json(fn, orient='records', lines=True)
+        df = pd.DataFrame(all_books)
+        logging.info(f"All done. Fetched {len(df)} items")
+        df['dataset_id'] = [f"book_{i}" for i in range(len(df))]
+        fn = f"{'pilot_' if args.pilot else ''}{args.start_date}_{args.end_date}_fiction.jsonl" if not args.d else "fiction_debug.jsonl"
+        df.to_json(fn, orient='records', lines=True)
     except Exception as e:
         logging.error(f"Error during scraping or DataFrame creation: {e}")
 
