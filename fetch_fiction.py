@@ -93,7 +93,7 @@ def main():
     parser = argparse.ArgumentParser(description='Scrape FictionDB for book descriptions.')
     parser.add_argument('--start_date', default="2018-01-01", type=str, help='Start date in YYYY-MM-DD format')
     parser.add_argument('--end_date', default="2023-01-01", type=str, help='End date in YYYY-MM-DD format')
-    parser.add_argument('--max_pages', default=15, type=int, help='Max pages to scrape for each month')
+    parser.add_argument('--max_pages', default=9, type=int, help='Max pages to scrape for each month')
     parser.add_argument('--d', action='store_true', help='Debug mode: scrape only one page')
     parser.add_argument('--pilot', action='store_true', help='Whether to denote this run a pilot run')
     args = parser.parse_args()
