@@ -57,7 +57,7 @@ def scrape_books_for_month(url):
         headers = {'User-Agent': 'Mozilla/5.0'}
         response = requests.get(url, headers=headers)
         if response.status_code != 200:
-            logging.info(f"Failed to fetch {url}")
+            logging.info(f"Failed to fetch {url}: {response.text}")
             return []
 
         soup = BeautifulSoup(response.text, "html.parser")
@@ -78,7 +78,7 @@ def scrape_books_for_month(url):
             books.append(book)
 
         if len(books) % 10 == 0:
-            time.sleep(random.uniform(0.5, 1.5))
+            time.sleep(random.uniform(1, 3))
         if books:
             logging.info(f"Scraped {len(books)} books for {url}")
         return books
@@ -107,9 +107,12 @@ def main():
         urls = urls[:1]
 
     try:
-        with multiprocessing.Pool(processes=min(len(urls), multiprocessing.cpu_count())) as pool:
-            results = pool.map(scrape_books_for_month, urls)
-            all_books = [book for monthly_books in results if monthly_books for book in monthly_books]
+        all_books = []
+        for url in urls:
+            monthly_books = scrape_books_for_month(url)
+            if monthly_books:
+                all_books.extend(monthly_books)
+                time.sleep(20, 60*10)
             df = pd.DataFrame(all_books)
             logging.info(f"All done. Fetched {len(df)} items")
             df['dataset_id'] = [f"book_{i}" for i in range(len(df))]
