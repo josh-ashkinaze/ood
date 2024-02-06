@@ -4,4 +4,3 @@ tenacity
 requests
 bs4
 ftfy
-hashlib
