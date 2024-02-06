@@ -47,7 +47,7 @@ def find_products(json_data):
     return products
 
 def fetch_product_hunt_data_for_date(current_date):
-    print(current_date)
+    #print(current_date)
     year = current_date.year
     month = current_date.month
     day = current_date.day
@@ -103,7 +103,10 @@ def main():
     for current_date in date_range:
         date_results = fetch_product_hunt_data_for_date(current_date)
         flat_products_list.extend(date_results)
-        sleep_time = random.uniform(5, 60)
+        sleep_time = random.uniform(0.5, 1.5)
+        if len(flat_products_list) % 1000 == 0:
+            sleep_time = random.uniform(5, 30)
+            logging.info("Sleeping for 5-30 seconds long sleep {}".format(sleep_time))
         logging.info(f"Sleeping for post-date {sleep_time}")
         time.sleep(sleep_time)
 
