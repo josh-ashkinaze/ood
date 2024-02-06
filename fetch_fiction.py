@@ -111,8 +111,12 @@ def main():
             if monthly_books:
                 all_books.extend(monthly_books)
                 sleep_time = random.uniform(10, 120)
-                logging.info("Sleeping for {}".format(sleep_time))
+                logging.info("Sleeping for post-book {}".format(sleep_time))
                 time.sleep(sleep_time)
+                if len(all_books) % 1000 == 0:
+                    long_sleep = random.uniform(500, 800)
+                    logging.info("Sleeping for long sleep {}".format(long_sleep))
+                    time.sleep(long_sleep)
         df = pd.DataFrame(all_books)
         logging.info(f"All done. Fetched {len(df)} items")
         df['dataset_id'] = [f"book_{i}" for i in range(len(df))]
