@@ -110,7 +110,7 @@ def main():
             monthly_books = scrape_books_for_month(url)
             if monthly_books:
                 all_books.extend(monthly_books)
-                sleep_time = random.uniform(10, 300)
+                sleep_time = random.uniform(10, 120)
                 logging.info("Sleeping for {}".format(sleep_time))
                 time.sleep(sleep_time)
         df = pd.DataFrame(all_books)
