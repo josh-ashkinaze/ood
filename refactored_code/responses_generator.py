@@ -1,5 +1,11 @@
 # responses_generator.py
-
+'''
+This script generates responses for a set of tasks using the LiteLLM API and saves the responses to a CSV file.
+To run the file, add a .env into the same folder that contains the variable OPENAI_API_KEY = 'your api key', 
+then run the python file to create and add to a csv file called responses.csv
+(this already exists in the main folder and contains around 200 results)
+To change the prompts, go to the tasks dictionary.
+'''
 import pandas as pd
 from litellm import LiteLLM, completion
 import os
